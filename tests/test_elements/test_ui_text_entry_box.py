@@ -2150,6 +2150,67 @@ class TestUITextEntryBox:
 
         assert processed_key_event
 
+    @pytest.mark.parametrize("delete_key", [None, pygame.K_BACKSPACE, pygame.K_DELETE])
+    @pytest.mark.parametrize("reverse_selection", [False, True])
+    @pytest.mark.parametrize(
+        "initial_text, selection, width",
+        [
+            pytest.param("abcd", (1, 3), 300, id="first-row"),
+            pytest.param("a\nbc", (3, 4), 300, id="later-row-prefix"),
+            pytest.param("a\nbc", (2, 4), 300, id="whole-later-row"),
+            pytest.param("a\nbc", (0, 4), 300, id="whole-text"),
+            pytest.param("first\nsecond\nthird", (8, 15), 300, id="multiple-rows"),
+            pytest.param(
+                "one two three four five six seven eight nine ten eleven twelve thirteen fourteen",
+                (19, None),
+                160,
+                id="wrapped-rows-removed",
+            ),
+        ],
+    )
+    def test_edit_selection_preserves_unselected_text(
+        self,
+        default_ui_manager: UIManager,
+        _display_surface_return_none: None,
+        delete_key: int | None,
+        reverse_selection: bool,
+        initial_text: str,
+        selection: tuple[int, int | None],
+        width: int,
+    ):
+        """Relayout after deletion must keep surviving text available for editing."""
+        start, end = selection
+        if end is None:
+            end = len(initial_text)
+        pygame.key.set_mods(pygame.KMOD_NONE)
+        text_entry = UITextEntryBox(
+            relative_rect=pygame.Rect(0, 0, width, 180),
+            initial_text=initial_text,
+            manager=default_ui_manager,
+        )
+        text_entry.focus()
+        text_entry.select_range = [end, start] if reverse_selection else [start, end]
+
+        if delete_key is not None:
+            assert text_entry.process_event(
+                pygame.event.Event(pygame.KEYDOWN, {"key": delete_key})
+            )
+            assert text_entry.get_text() == initial_text[:start] + initial_text[end:]
+
+        for replacement in ("r", "s"):
+            assert text_entry.process_event(
+                pygame.event.Event(pygame.TEXTINPUT, {"text": replacement})
+            )
+        expected = initial_text[:start] + "rs" + initial_text[end:]
+        assert text_entry.get_text() == expected
+        assert text_entry.text_box_layout is not None
+        assert text_entry.text_box_layout.letter_count == len(expected)
+
+        surface = pygame.display.get_surface()
+        assert surface is not None
+        default_ui_manager.update(0.016)
+        default_ui_manager.draw_ui(surface)
+
     @pytest.mark.filterwarnings("ignore:Invalid value")
     @pytest.mark.filterwarnings("ignore:Colour hex code")
     @pytest.mark.filterwarnings("ignore:Invalid Theme Colour")
