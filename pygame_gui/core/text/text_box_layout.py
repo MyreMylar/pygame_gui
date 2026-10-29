@@ -1429,7 +1429,8 @@ class TextBoxLayout:
         self._merge_adjacent_compatible_chunks(temp_layout_queue)
         self._process_layout_queue(temp_layout_queue, row_to_process_from)
 
-        if len(current_row.items) == 0:
+        # Reflow may have moved this row's surviving chunks into a replacement row.
+        if len(current_row.items) == 0 and any(row is current_row for row in self.layout_rows):
             self._setup_and_add_empty_chunk(current_row_starting_chunk, current_row)
         if self.finalised_surface is not None:
             for row in self.layout_rows[row_to_process_from_index:]:
