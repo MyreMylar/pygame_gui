@@ -60,6 +60,9 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         # Need to move some declarations early as they are indirectly referenced via the ui element
         # constructor
         self._root_container = None
+        self._view_container = None
+        self.vert_scroll_bar = None
+        self.horiz_scroll_bar = None
         if element_id is None:
             element_id = ["scrolling_container"]
         super().__init__(
@@ -592,8 +595,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         if self._root_container is not None:
             self._root_container.show(show_contents=False)
 
-        self.vert_scroll_bar.show()
-        self.horiz_scroll_bar.show()
+        if self.vert_scroll_bar is not None:
+            self.vert_scroll_bar.show()
+        if self.horiz_scroll_bar is not None:
+            self.horiz_scroll_bar.show()
 
         if self._view_container is not None:
             self._view_container.show(show_contents)
@@ -612,8 +617,10 @@ class UIScrollingContainer(UIElement, IContainerLikeInterface):
         if self._root_container is not None:
             self._root_container.hide(hide_contents=False)
 
-        self.vert_scroll_bar.hide()
-        self.horiz_scroll_bar.hide()
+        if self.vert_scroll_bar is not None:
+            self.vert_scroll_bar.hide()
+        if self.horiz_scroll_bar is not None:
+            self.horiz_scroll_bar.hide()
 
         if self._view_container is not None:
             self._view_container.hide(hide_contents)

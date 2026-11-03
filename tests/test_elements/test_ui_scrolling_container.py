@@ -8,9 +8,40 @@ from pygame_gui.elements.ui_scrolling_container import UIScrollingContainer
 from pygame_gui.elements.ui_button import UIButton
 from pygame_gui.elements.ui_text_box import UITextBox
 from pygame_gui.core.interfaces import IUIManagerInterface
+from pygame_gui.core import UIContainer
 
 
 class TestUIScrollingContainer:
+    def test_creation_in_hidden_parent(
+        self, _init_pygame, default_ui_manager, _display_surface_return_none
+    ):
+        parent = UIContainer(
+            pygame.Rect(0, 0, 400, 400), manager=default_ui_manager, visible=0
+        )
+        container = UIScrollingContainer(
+            pygame.Rect(0, 0, 200, 200), manager=default_ui_manager, container=parent
+        )
+        container.set_scrollable_area_dimensions((500, 600))
+
+        assert not container.visible
+        assert not container._root_container.visible
+        assert not container._view_container.visible
+        assert not container.vert_scroll_bar.visible
+        assert not container.horiz_scroll_bar.visible
+        assert not container.scrollable_container.visible
+
+        parent.show()
+        assert container.visible
+        assert container._root_container.visible
+        assert container._view_container.visible
+        assert container.vert_scroll_bar.visible
+        assert container.horiz_scroll_bar.visible
+        assert container.scrollable_container.visible
+
+        parent.hide()
+        assert not container.visible
+        assert not container.scrollable_container.visible
+
     def test_creation(
         self, _init_pygame, default_ui_manager, _display_surface_return_none
     ):
